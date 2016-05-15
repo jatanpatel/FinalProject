@@ -1,0 +1,50 @@
+su - to be root
+yum -y install mariadb-server mariadb
+systemctl start mariadb.service
+systemctl enable mariadb.service
+mysql_secure_installation
+yum -y install httpd
+systemctl start httpd.service
+systemctl enable httpd.service
+yum -y install php
+systemctl restart httpd.service
+vi /var/www/html/info.php
+yum search php
+yum -y install php-mysql
+yum -y install php-gd php-ldap php-odbc php-pear php-xml php-xmlrpc php-mbstring php-snmp php-soap curl curl-devel
+systemctl restart httpd.service
+yum install phpMyAdmin
+vi /etc/httpd/conf.d/phpMyAdmin.conf
+vi /etc/phpMyAdmin/config.inc.php
+systemctl restart  httpd.service
+yum install -y httpd php
+yum install -y gcc glibc glibc-common make gd gd-devel net-snmp
+useradd nagios
+groupadd nagcmd
+usermod -G nagcmd nagios
+usermod -G nagcmd apache
+mkdir ~/nagios
+cd ~/nagios
+wget http://prdownloads.sourceforge.net/sourceforge/nagios/nagios-4.0.7.tar.gz
+wget http://www.nagios-plugins.org/download/nagios-plugins-2.0.3.tar.gz
+tar zxvf nagios-4.0.7.tar.gz
+tar zxvf nagios-plugins-2.0.3.tar.gz
+cd nagios-4.0.7
+./configure --with-command-group=nagcmd
+make all
+make install
+make install-init
+make install-commandmode
+make install-config
+vim /usr/local/nagios/etc/objects/contacts.cfg
+make install-webconf
+htpasswd -s -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+systemctl start httpd.service
+cd ~/nagios/nagios-plugins-2.0.3
+./configure --with-nagios-user=nagios --with-nagios-group=nagios
+make
+make install
+/usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+chkconfig --add nagios
+chkconfig --level 35 nagios on
+systemctl start nagios.service
